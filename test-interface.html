@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz API Test Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .success { background-color: #27ae60; }
+        .success:hover { background-color: #229954; }
+        .warning { background-color: #f39c12; }
+        .warning:hover { background-color: #e67e22; }
+        .danger { background-color: #e74c3c; }
+        .danger:hover { background-color: #c0392b; }
+        
+        .response {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            min-width: 250px;
+            max-width: 400px;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: #27ae60;
+        }
+        
+        .toast.error {
+            background: #e74c3c;
+        }
+        
+        .toast.warning {
+            background: #f39c12;
+        }
+        
+        .toast.info {
+            background: #3498db;
+        }
+        
+        .quiz-info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .endpoint-info {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="container">
+        <h1>🧠 Quiz Application API Test Interface</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Test all API endpoints and watch the requests in your terminal!<br>
+            <strong>Server running at:</strong> http://localhost:3000
+        </p>
+
+        <!-- Health Check Section -->
+        <div class="section">
+            <h2>1. Health Check</h2>
+            <div class="endpoint-info">GET /api/v1/health</div>
+            <button onclick="healthCheck()">Check API Health</button>
+            <div id="health-response" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Quiz Management Section -->
+        <div class="section">
+            <h2>2. Quiz Management</h2>
+            
+            <h3>Create Quiz</h3>
+            <div class="endpoint-info">POST /api/v1/quizzes</div>
+            <div class="input-group">
+                <input type="text" id="quiz-title" placeholder="Quiz Title" value="JavaScript Fundamentals Quiz">
+                <textarea id="quiz-description" placeholder="Quiz Description">Test your knowledge of JavaScript basics and advanced concepts</textarea>
+            </div>
+            <button onclick="createQuiz()" class="success">Create Quiz</button>
+            
+            <h3>Get All Quizzes</h3>
+            <div class="endpoint-info">GET /api/v1/quizzes</div>
+            <button onclick="getAllQuizzes()">Get All Quizzes</button>
+            
+            <div id="quiz-response" class="response" style="display: none;"></div>
+            <div id="current-quiz" class="quiz-info" style="display: none;">
+                <strong>Current Quiz ID:</strong> <span id="quiz-id"></span><br>
+                <strong>Title:</strong> <span id="quiz-title-display"></span>
+            </div>
+        </div>
+
+        <!-- Question Management Section -->
+        <div class="section">
+            <h2>3. Question Management</h2>
+            
+            <h3>Add Single Choice Question</h3>
+            <div class="endpoint-info">POST /api/v1/quizzes/{quizId}/questions</div>
+            <button onclick="addSingleChoiceQuestion()" class="success" id="add-single-btn" disabled>Add Single Choice Question</button>
+            
+            <h3>Add Multiple Choice Question</h3>
+            <button onclick="addMultipleChoiceQuestion()" class="success" id="add-multiple-btn" disabled>Add Multiple Choice Question</button>
+            
+            <h3>Add Text-based Question</h3>
+            <button onclick="addTextQuestion()" class="success" id="add-text-btn" disabled>Add Text-based Question</button>
+            
+            <h3>Get Quiz Questions</h3>
+            <div class="endpoint-info">GET /api/v1/quizzes/{quizId}/questions</div>
+            <button onclick="getQuizQuestions()" id="get-questions-btn" disabled>Get Quiz Questions</button>
+            
+            <div id="question-response" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Quiz Submission Section -->
+        <div class="section">
+            <h2>4. Quiz Submission & Scoring</h2>
+            <div class="endpoint-info">POST /api/v1/quizzes/{quizId}/submit</div>
+            <button onclick="submitCorrectAnswers()" class="success" id="submit-correct-btn" disabled>Submit Correct Answers (100% Score)</button>
+            <button onclick="submitPartialAnswers()" class="warning" id="submit-partial-btn" disabled>Submit Partial Answers (~66% Score)</button>
+            <button onclick="submitWrongAnswers()" class="danger" id="submit-wrong-btn" disabled>Submit Wrong Answers (0% Score)</button>
+            
+            <div id="submission-response" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Validation Testing Section -->
+        <div class="section">
+            <h2>5. Validation Testing</h2>
+            <button onclick="testInvalidQuiz()" class="danger">Test Invalid Quiz Creation</button>
+            <button onclick="testInvalidQuestion()" class="danger" id="test-invalid-btn" disabled>Test Invalid Question Creation</button>
+            
+            <div id="validation-response" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Status Section -->
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let currentQuizId = null;
+        let currentQuestions = [];
+
+        // Toast notification system
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove toast after duration
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        function showResponse(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.style.display = 'block';
+        }
+
+        async function makeRequest(url, method = 'GET', body = null) {
+            try {
+                // Ensure we use the full URL
+                const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
+                
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                console.log(`Making ${method} request to: ${fullUrl}`);
+                const response = await fetch(fullUrl, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${data.message || 'Request failed'}`);
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Request failed:', error);
+                throw error;
+            }
+        }
+
+        async function healthCheck() {
+            try {
+                console.log('Starting health check...');
+                showToast('🔍 Checking API health...', 'info', 2000);
+                
+                const data = await makeRequest('/api/v1/health');
+                showResponse('health-response', data);
+                showToast('✅ API is running perfectly!', 'success', 4000);
+                console.log('Health check completed successfully:', data);
+            } catch (error) {
+                console.error('Health check error:', error);
+                showToast('❌ API is not responding!', 'error', 5000);
+                showResponse('health-response', { error: error.message });
+            }
+        }
+
+        async function createQuiz() {
+            try {
+                const title = document.getElementById('quiz-title').value;
+                const description = document.getElementById('quiz-description').value;
+                
+                showToast('➕ Creating quiz...', 'info', 2000);
+                
+                const data = await makeRequest('/api/v1/quizzes', 'POST', {
+                    title,
+                    description
+                });
+                
+                currentQuizId = data.data.quizId;
+                document.getElementById('quiz-id').textContent = currentQuizId;
+                document.getElementById('quiz-title-display').textContent = data.data.quizTitle;
+                document.getElementById('current-quiz').style.display = 'block';
+                
+                // Enable question buttons
+                document.getElementById('add-single-btn').disabled = false;
+                document.getElementById('add-multiple-btn').disabled = false;
+                document.getElementById('add-text-btn').disabled = false;
+                document.getElementById('get-questions-btn').disabled = false;
+                document.getElementById('test-invalid-btn').disabled = false;
+                
+                showResponse('quiz-response', data);
+                showToast(`✅ Quiz "${data.data.quizTitle}" created!`, 'success', 4000);
+                showStatus('✅ Quiz Created Successfully!');
+            } catch (error) {
+                showToast('❌ Quiz creation failed!', 'error', 4000);
+                showStatus('❌ Failed to Create Quiz: ' + error.message, 'error');
+            }
+        }
+
+        async function getAllQuizzes() {
+            try {
+                showToast('📋 Fetching all quizzes...', 'info', 2000);
+                
+                const data = await makeRequest('/api/v1/quizzes');
+                showResponse('quiz-response', data);
+                showToast(`✅ Found ${data.data.length} quiz(es)!`, 'success', 4000);
+                showStatus(`✅ Retrieved ${data.data.length} Quizzes`);
+            } catch (error) {
+                showToast('❌ Failed to fetch quizzes!', 'error', 4000);
+                showStatus('❌ Failed to Get Quizzes: ' + error.message, 'error');
+            }
+        }
+
+        async function addSingleChoiceQuestion() {
+            try {
+                showToast('🔘 Adding single choice question...', 'info', 2000);
+                
+                const questionData = {
+                    text: "What is the correct way to declare a variable in JavaScript?",
+                    type: "single_select",
+                    options: [
+                        { text: "var x = 5;", isCorrect: false },
+                        { text: "let x = 5;", isCorrect: true },
+                        { text: "x = 5;", isCorrect: false },
+                        { text: "variable x = 5;", isCorrect: false }
+                    ]
+                };
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/questions`, 'POST', questionData);
+                showResponse('question-response', data);
+                showToast('✅ Single choice question added!', 'success', 4000);
+                showStatus('✅ Single Choice Question Added!');
+            } catch (error) {
+                showToast('❌ Failed to add question!', 'error', 4000);
+                showStatus('❌ Failed to Add Question: ' + error.message, 'error');
+            }
+        }
+
+        async function addMultipleChoiceQuestion() {
+            try {
+                showToast('☑️ Adding multiple choice question...', 'info', 2000);
+                
+                const questionData = {
+                    text: "Which of the following are JavaScript data types?",
+                    type: "multi_select",
+                    options: [
+                        { text: "string", isCorrect: true },
+                        { text: "number", isCorrect: true },
+                        { text: "float", isCorrect: false },
+                        { text: "boolean", isCorrect: true }
+                    ]
+                };
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/questions`, 'POST', questionData);
+                showResponse('question-response', data);
+                showToast('✅ Multiple choice question added!', 'success', 4000);
+                showStatus('✅ Multiple Choice Question Added!');
+            } catch (error) {
+                showToast('❌ Failed to add question!', 'error', 4000);
+                showStatus('❌ Failed to Add Question: ' + error.message, 'error');
+            }
+        }
+
+        async function addTextQuestion() {
+            try {
+                showToast('📝 Adding text-based question...', 'info', 2000);
+                
+                const questionData = {
+                    text: "Explain what 'hoisting' means in JavaScript (max 300 characters)",
+                    type: "open_text",
+                    options: [
+                        { text: "hoisting", isCorrect: true },
+                        { text: "variable declaration", isCorrect: true }
+                    ]
+                };
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/questions`, 'POST', questionData);
+                showResponse('question-response', data);
+                showToast('✅ Text-based question added!', 'success', 4000);
+                showStatus('✅ Text-based Question Added!');
+                
+                // Enable submission buttons after adding questions
+                document.getElementById('submit-correct-btn').disabled = false;
+                document.getElementById('submit-partial-btn').disabled = false;
+                document.getElementById('submit-wrong-btn').disabled = false;
+            } catch (error) {
+                showToast('❌ Failed to add question!', 'error', 4000);
+                showStatus('❌ Failed to Add Question: ' + error.message, 'error');
+            }
+        }
+
+        async function getQuizQuestions() {
+            try {
+                showToast('🔍 Fetching quiz questions...', 'info', 2000);
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/questions`);
+                currentQuestions = data.data.questions;
+                showResponse('question-response', data);
+                showToast(`✅ Found ${data.count} question(s)!`, 'success', 4000);
+                showStatus(`✅ Retrieved ${data.count} Questions`);
+            } catch (error) {
+                showToast('❌ Failed to fetch questions!', 'error', 4000);
+                showStatus('❌ Failed to Get Questions: ' + error.message, 'error');
+            }
+        }
+
+        async function submitCorrectAnswers() {
+            if (currentQuestions.length === 0) {
+                await getQuizQuestions();
+            }
+            
+            try {
+                showToast('🎯 Submitting correct answers...', 'info', 2000);
+                
+                const answers = [];
+                
+                // Handle different question types properly
+                for (let i = 0; i < currentQuestions.length; i++) {
+                    const question = currentQuestions[i];
+                    
+                    if (question.questionType === 'single_select') {
+                        // Find the correct option
+                        const correctOption = question.availableChoices.find(opt => 
+                            // We can't see isValidAnswer, so we'll pick the second option as our guess
+                            question.availableChoices.indexOf(opt) === 1
+                        );
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionId: correctOption.choiceId
+                        });
+                    } else if (question.questionType === 'multi_select') {
+                        // For multiple choice, select first, second, and fourth options (string, number, boolean)
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionIds: [
+                                question.availableChoices[0].choiceId, // "string"
+                                question.availableChoices[1].choiceId, // "number"
+                                question.availableChoices[3].choiceId  // "boolean"
+                            ]
+                        });
+                    } else if (question.questionType === 'open_text') {
+                        answers.push({
+                            questionId: question.questionId,
+                            textAnswer: "Hoisting in JavaScript means that variable declarations are moved to the top of their scope"
+                        });
+                    }
+                }
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/submit`, 'POST', answers);
+                showResponse('submission-response', data);
+                showToast(`🎉 Perfect score: ${data.finalScore}/${data.maxPossibleScore}!`, 'success', 5000);
+                showStatus(`✅ Quiz Submitted! Score: ${data.finalScore}/${data.maxPossibleScore}`);
+            } catch (error) {
+                showToast('❌ Submission failed!', 'error', 4000);
+                showStatus('❌ Failed to Submit Quiz: ' + error.message, 'error');
+            }
+        }
+
+        async function submitPartialAnswers() {
+            if (currentQuestions.length === 0) {
+                await getQuizQuestions();
+            }
+            
+            try {
+                showToast('📝 Submitting partial answers...', 'warning', 2000);
+                
+                const answers = [];
+                
+                for (let i = 0; i < currentQuestions.length; i++) {
+                    const question = currentQuestions[i];
+                    
+                    if (question.questionType === 'single_select') {
+                        // Pick the correct answer
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionId: question.availableChoices[1].choiceId
+                        });
+                    } else if (question.questionType === 'multi_select') {
+                        // Only select one correct option (partial credit)
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionIds: [question.availableChoices[0].choiceId] // Only "string"
+                        });
+                    } else if (question.questionType === 'open_text') {
+                        answers.push({
+                            questionId: question.questionId,
+                            textAnswer: "Something about variables" // Partially correct
+                        });
+                    }
+                }
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/submit`, 'POST', answers);
+                showResponse('submission-response', data);
+                showToast(`📊 Partial score: ${data.finalScore}/${data.maxPossibleScore}`, 'warning', 5000);
+                showStatus(`✅ Quiz Submitted! Score: ${data.finalScore}/${data.maxPossibleScore}`);
+            } catch (error) {
+                showToast('❌ Submission failed!', 'error', 4000);
+                showStatus('❌ Failed to Submit Quiz: ' + error.message, 'error');
+            }
+        }
+
+        async function submitWrongAnswers() {
+            if (currentQuestions.length === 0) {
+                await getQuizQuestions();
+            }
+            
+            try {
+                showToast('❌ Submitting wrong answers...', 'error', 2000);
+                
+                const answers = [];
+                
+                for (let i = 0; i < currentQuestions.length; i++) {
+                    const question = currentQuestions[i];
+                    
+                    if (question.questionType === 'single_select') {
+                        // Pick wrong answer (first option)
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionId: question.availableChoices[0].choiceId
+                        });
+                    } else if (question.questionType === 'multi_select') {
+                        // Pick wrong answer (float)
+                        answers.push({
+                            questionId: question.questionId,
+                            selectedOptionIds: [question.availableChoices[2].choiceId] // "float"
+                        });
+                    } else if (question.questionType === 'open_text') {
+                        answers.push({
+                            questionId: question.questionId,
+                            textAnswer: "I have no idea what this means" // Wrong
+                        });
+                    }
+                }
+                
+                const data = await makeRequest(`/api/v1/quizzes/${currentQuizId}/submit`, 'POST', answers);
+                showResponse('submission-response', data);
+                showToast(`💔 Score: ${data.finalScore}/${data.maxPossibleScore} (as expected!)`, 'error', 5000);
+                showStatus(`✅ Quiz Submitted! Score: ${data.finalScore}/${data.maxPossibleScore}`);
+            } catch (error) {
+                showToast('❌ Submission failed!', 'error', 4000);
+                showStatus('❌ Failed to Submit Quiz: ' + error.message, 'error');
+            }
+        }
+
+        async function testInvalidQuiz() {
+            try {
+                showToast('🚫 Testing invalid quiz creation...', 'warning', 2000);
+                
+                await makeRequest('/api/v1/quizzes', 'POST', { title: "A" });
+            } catch (error) {
+                showResponse('validation-response', { error: error.message });
+                showToast('✅ Validation working correctly!', 'success', 4000);
+                showStatus('✅ Validation Test Passed: ' + error.message);
+            }
+        }
+
+        async function testInvalidQuestion() {
+            try {
+                showToast('🚫 Testing invalid question creation...', 'warning', 2000);
+                
+                const invalidQuestion = {
+                    text: "Invalid single choice question",
+                    type: "single_select",
+                    options: [
+                        { text: "Option 1", isCorrect: true },
+                        { text: "Option 2", isCorrect: true } // Invalid - multiple correct answers for single choice
+                    ]
+                };
+                
+                await makeRequest(`/api/v1/quizzes/${currentQuizId}/questions`, 'POST', invalidQuestion);
+            } catch (error) {
+                showResponse('validation-response', { error: error.message });
+                showToast('✅ Question validation working!', 'success', 4000);
+                showStatus('✅ Validation Test Passed: ' + error.message);
+            }
+        }
+
+        // Initialize the page
+        window.onload = function() {
+            showToast('🚀 Initializing Quiz API Test Interface...', 'info', 2000);
+            
+            // Auto health check after a short delay
+            setTimeout(() => {
+                healthCheck();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

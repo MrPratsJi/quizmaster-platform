@@ -1,0 +1,221 @@
+{
+  "info": {
+    "name": "Quiz Application API",
+    "description": "Complete API testing collection for the Quiz Application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "api_base",
+      "value": "{{base_url}}/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "quiz_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base}}/health",
+          "host": ["{{api_base}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Create Quiz",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"JavaScript Fundamentals Quiz\",\n  \"description\": \"Test your knowledge of JavaScript basics\"\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes"]
+        }
+      }
+    },
+    {
+      "name": "Get All Quizzes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base}}/quizzes",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes"]
+        }
+      }
+    },
+    {
+      "name": "Get Quiz by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Add Single Choice Question",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"What is the correct way to declare a variable in JavaScript?\",\n  \"type\": \"single_choice\",\n  \"options\": [\n    {\n      \"text\": \"var x = 5;\",\n      \"isCorrect\": false\n    },\n    {\n      \"text\": \"let x = 5;\",\n      \"isCorrect\": true\n    },\n    {\n      \"text\": \"x = 5;\",\n      \"isCorrect\": false\n    },\n    {\n      \"text\": \"variable x = 5;\",\n      \"isCorrect\": false\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/questions",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "questions"]
+        }
+      }
+    },
+    {
+      "name": "Add Multiple Choice Question",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Which of the following are JavaScript data types?\",\n  \"type\": \"multiple_choice\",\n  \"options\": [\n    {\n      \"text\": \"string\",\n      \"isCorrect\": true\n    },\n    {\n      \"text\": \"number\",\n      \"isCorrect\": true\n    },\n    {\n      \"text\": \"float\",\n      \"isCorrect\": false\n    },\n    {\n      \"text\": \"boolean\",\n      \"isCorrect\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/questions",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "questions"]
+        }
+      }
+    },
+    {
+      "name": "Add Text-based Question",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Explain what 'hoisting' means in JavaScript (max 300 characters)\",\n  \"type\": \"text_based\",\n  \"options\": [\n    {\n      \"text\": \"hoisting\",\n      \"isCorrect\": true\n    },\n    {\n      \"text\": \"variable declaration\",\n      \"isCorrect\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/questions",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "questions"]
+        }
+      }
+    },
+    {
+      "name": "Get Quiz Questions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/questions",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "questions"]
+        }
+      }
+    },
+    {
+      "name": "Submit Quiz Answers",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"answers\": [\n    {\n      \"questionId\": \"REPLACE_WITH_ACTUAL_QUESTION_ID_1\",\n      \"selectedOptionIds\": [\"REPLACE_WITH_CORRECT_OPTION_ID\"]\n    },\n    {\n      \"questionId\": \"REPLACE_WITH_ACTUAL_QUESTION_ID_2\",\n      \"selectedOptionIds\": [\"OPTION_ID_1\", \"OPTION_ID_2\", \"OPTION_ID_3\"]\n    },\n    {\n      \"questionId\": \"REPLACE_WITH_ACTUAL_QUESTION_ID_3\",\n      \"textAnswer\": \"Hoisting in JavaScript means that variable declarations are moved to the top\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/submit",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "submit"]
+        }
+      }
+    },
+    {
+      "name": "Test Invalid Quiz Creation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"A\"\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes"]
+        }
+      }
+    },
+    {
+      "name": "Test Invalid Question Creation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Invalid single choice question\",\n  \"type\": \"single_choice\",\n  \"options\": [\n    {\n      \"text\": \"Option 1\",\n      \"isCorrect\": true\n    },\n    {\n      \"text\": \"Option 2\",\n      \"isCorrect\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{api_base}}/quizzes/{{quiz_id}}/questions",
+          "host": ["{{api_base}}"],
+          "path": ["quizzes", "{{quiz_id}}", "questions"]
+        }
+      }
+    }
+  ]
+}

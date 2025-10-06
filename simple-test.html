@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Quiz API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        button { padding: 15px 25px; margin: 10px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .response { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+        .toast.warning { background: #f39c12; }
+        .toast.info { background: #3498db; }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <h1>🧪 Simple Quiz API Test</h1>
+    <p><strong>Server:</strong> http://localhost:3000</p>
+    
+    <div>
+        <button onclick="testHealth()">🔍 Test Health Endpoint</button>
+        <button onclick="testCreateQuiz()">➕ Create Quiz & Add Question</button>
+        <button onclick="testGetQuizzes()">📋 Get All Quizzes</button>
+        <button onclick="testSubmitQuiz()">📝 Submit Quiz (Correct Answer)</button>
+    </div>
+    
+    <div id="status" class="status" style="display: none;"></div>
+    <div id="response" class="response" style="display: none;"></div>
+
+    <script>
+        let currentQuizId = null;
+
+        // Toast notification system
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove toast after duration
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+
+        function showResponse(data) {
+            const response = document.getElementById('response');
+            response.textContent = JSON.stringify(data, null, 2);
+            response.style.display = 'block';
+        }
+
+        async function testHealth() {
+            showToast('🔍 Checking API health...', 'info', 2000);
+            console.log('Making health check request...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/health');
+                console.log('Response received:', response.status);
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                showResponse(data);
+                showToast('✅ API is running perfectly!', 'success', 4000);
+                showStatus('✅ Health check successful!', 'success');
+            } catch (error) {
+                console.error('Health check failed:', error);
+                showToast('❌ API is not responding!', 'error', 5000);
+                showStatus('❌ Health check failed: ' + error.message, 'error');
+                showResponse({ error: error.message });
+            }
+        }
+
+        async function testCreateQuiz() {
+            showToast('➕ Creating quiz...', 'info', 2000);
+            console.log('Making create quiz request...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/quizzes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: 'JavaScript Basic Quiz',
+                        description: 'A simple quiz about JavaScript basics'
+                    })
+                });
+                
+                console.log('Response received:', response.status);
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                if (data.success) {
+                    currentQuizId = data.data.quizId;
+                    showToast(`✅ Quiz created! ID: ${currentQuizId}`, 'success', 4000);
+                    showStatus(`✅ Quiz created! ID: ${currentQuizId}`, 'success');
+                    
+                    // Automatically add a sample question
+                    await addSampleQuestion();
+                } else {
+                    showToast('❌ Failed to create quiz', 'error', 4000);
+                    showStatus('❌ Failed to create quiz', 'error');
+                }
+                
+                showResponse(data);
+            } catch (error) {
+                console.error('Create quiz failed:', error);
+                showToast('❌ Quiz creation failed!', 'error', 4000);
+                showStatus('❌ Create quiz failed: ' + error.message, 'error');
+                showResponse({ error: error.message });
+            }
+        }
+
+        async function addSampleQuestion() {
+            if (!currentQuizId) {
+                showToast('❌ Create a quiz first!', 'warning', 3000);
+                showStatus('❌ No quiz available. Create a quiz first.', 'error');
+                return;
+            }
+
+            showToast('📝 Adding sample question...', 'info', 2000);
+            showStatus('Adding sample question...', 'success');
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/quizzes/${currentQuizId}/questions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: 'What is the correct way to declare a variable in JavaScript?',
+                        type: 'single_select',
+                        options: [
+                            { text: 'var myVar;', isCorrect: false },
+                            { text: 'let myVar;', isCorrect: true },
+                            { text: 'variable myVar;', isCorrect: false },
+                            { text: 'declare myVar;', isCorrect: false }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ Question added successfully!', 'success', 4000);
+                    showStatus('✅ Sample question added successfully!', 'success');
+                } else {
+                    showToast('❌ Failed to add question!', 'error', 4000);
+                    showStatus('❌ Failed to add question', 'error');
+                }
+                
+                showResponse(data);
+            } catch (error) {
+                console.error('Add question failed:', error);
+                showToast('❌ Question creation failed!', 'error', 4000);
+                showStatus('❌ Add question failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testSubmitQuiz() {
+            if (!currentQuizId) {
+                showToast('❌ Create a quiz first!', 'warning', 3000);
+                showStatus('❌ No quiz available. Create a quiz first.', 'error');
+                return;
+            }
+
+            showToast('📝 Submitting quiz answers...', 'info', 2000);
+            
+            try {
+                // First get the questions to know the question IDs
+                const questionsResponse = await fetch(`http://localhost:3000/api/v1/quizzes/${currentQuizId}/questions`);
+                const questionsData = await questionsResponse.json();
+                
+                if (!questionsData.success || questionsData.data.questions.length === 0) {
+                    showToast('❌ No questions found!', 'error', 4000);
+                    showStatus('❌ No questions found in quiz', 'error');
+                    return;
+                }
+
+                const firstQuestion = questionsData.data.questions[0];
+                const correctOptionId = firstQuestion.availableChoices[1].choiceId; // Second option is correct
+                
+                // Submit answer in the new format: array of {questionId, selectedOptionId}
+                const submission = [
+                    {
+                        questionId: firstQuestion.questionId,
+                        selectedOptionId: correctOptionId
+                    }
+                ];
+
+                const response = await fetch(`http://localhost:3000/api/v1/quizzes/${currentQuizId}/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(submission)
+                });
+                
+                const data = await response.json();
+                console.log('Submission result:', data);
+                
+                if (response.ok) {
+                    showToast(`🎉 Score: ${data.finalScore}/${data.maxPossibleScore}!`, 'success', 5000);
+                    showStatus(`✅ Quiz submitted! Score: ${data.finalScore}/${data.maxPossibleScore}`, 'success');
+                } else {
+                    showToast('❌ Submission failed!', 'error', 4000);
+                    showStatus('❌ Failed to submit quiz', 'error');
+                }
+                
+                showResponse(data);
+            } catch (error) {
+                console.error('Submit quiz failed:', error);
+                showToast('❌ Submission error!', 'error', 4000);
+                showStatus('❌ Submit quiz failed: ' + error.message, 'error');
+                showResponse({ error: error.message });
+            }
+        }
+
+        async function testGetQuizzes() {
+            showToast('📋 Fetching all quizzes...', 'info', 2000);
+            showStatus('Getting all quizzes...', 'success');
+            console.log('Making get quizzes request...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/quizzes');
+                console.log('Response received:', response.status);
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                showResponse(data);
+                showToast(`✅ Found ${data.data?.length || 0} quiz(es)!`, 'success', 4000);
+                showStatus(`✅ Retrieved ${data.data?.length || 0} quizzes`, 'success');
+            } catch (error) {
+                console.error('Get quizzes failed:', error);
+                showToast('❌ Failed to fetch quizzes!', 'error', 4000);
+                showStatus('❌ Get quizzes failed: ' + error.message, 'error');
+                showResponse({ error: error.message });
+            }
+        }
+
+        // Initialize and auto-check API status
+        console.log('Simple Quiz API Test loaded');
+        showToast('🚀 Quiz API Test Interface loaded', 'info', 2000);
+        
+        // Auto health check after a short delay
+        setTimeout(() => {
+            testHealth();
+        }, 1000);
+    </script>
+</body>
+</html>
