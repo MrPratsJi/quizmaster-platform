@@ -7,11 +7,14 @@ import path from 'path';
 import fs from 'fs';
 
 // Import your existing app components
-import quizRoutes from '../src/routes/quiz';
+import { QuizManagementController } from '../src/controllers/QuizManagementController';
 
-console.log('Quiz routes imported:', typeof quizRoutes);
+console.log('Starting API setup...');
 
 const app = express();
+const quizController = new QuizManagementController();
+
+console.log('Controllers initialized');
 
 // Middleware
 app.use(helmet({
@@ -34,10 +37,54 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
-console.log('Registering quiz routes...');
-app.use('/api/v1', quizRoutes);
-console.log('Quiz routes registered successfully');
+// Direct API routes instead of using the router
+console.log('Setting up direct routes...');
+
+// Health check
+app.get('/api/v1/health', (req, res) => {
+  console.log('Health check hit');
+  res.json({
+    success: true,
+    message: 'QuizMaster Management API is operational',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production',
+    version: '1.0.0',
+    uptime: process.uptime()
+  });
+});
+
+// Quiz routes
+app.post('/api/v1/quizzes', (req, res) => {
+  console.log('POST /api/v1/quizzes hit');
+  quizController.establishQuiz(req, res);
+});
+
+app.get('/api/v1/quizzes', (req, res) => {
+  console.log('GET /api/v1/quizzes hit');
+  quizController.retrieveQuizCollection(req, res);
+});
+
+app.get('/api/v1/quizzes/:quizId', (req, res) => {
+  console.log('GET /api/v1/quizzes/:quizId hit');
+  quizController.locateQuizByIdentifier(req, res);
+});
+
+app.post('/api/v1/quizzes/:quizId/questions', (req, res) => {
+  console.log('POST /api/v1/quizzes/:quizId/questions hit');
+  quizController.attachQuestionToQuiz(req, res);
+});
+
+app.get('/api/v1/quizzes/:quizId/questions', (req, res) => {
+  console.log('GET /api/v1/quizzes/:quizId/questions hit');
+  quizController.fetchParticipantQuestions(req, res);
+});
+
+app.post('/api/v1/quizzes/:quizId/submit', (req, res) => {
+  console.log('POST /api/v1/quizzes/:quizId/submit hit');
+  quizController.processQuizSubmission(req, res);
+});
+
+console.log('Direct routes setup complete');
 
 // Serve test interface for root route
 app.get('/', (req, res) => {
