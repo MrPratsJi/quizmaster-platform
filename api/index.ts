@@ -12,7 +12,16 @@ import quizRoutes from '../src/routes/quiz';
 const app = express();
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "*"]
+    }
+  }
+}));
 app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
@@ -55,9 +64,14 @@ app.get('/', (req, res) => {
 app.get('/test', (req, res) => {
   const testInterfacePath = path.join(__dirname, '..', 'test-interface.html');
   if (fs.existsSync(testInterfacePath)) {
+    // Set CSP headers to allow inline scripts
+    res.setHeader('Content-Security-Policy', 
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' *");
     res.sendFile(testInterfacePath);
   } else {
     // If file doesn't exist, serve a basic test interface
+    res.setHeader('Content-Security-Policy', 
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' *");
     res.send(`
       <!DOCTYPE html>
       <html>

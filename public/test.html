@@ -174,7 +174,7 @@
         <div class="section">
             <h2>1. Health Check</h2>
             <div class="endpoint-info">GET /api/v1/health</div>
-            <button onclick="healthCheck()">Check API Health</button>
+            <button onclick="healthCheck()" id="health-check-btn">Check API Health</button>
             <div id="health-response" class="response" style="display: none;"></div>
         </div>
 
@@ -188,11 +188,11 @@
                 <input type="text" id="quiz-title" placeholder="Quiz Title" value="JavaScript Fundamentals Quiz">
                 <textarea id="quiz-description" placeholder="Quiz Description">Test your knowledge of JavaScript basics and advanced concepts</textarea>
             </div>
-            <button onclick="createQuiz()" class="success">Create Quiz</button>
+            <button onclick="createQuiz()" class="success" id="create-quiz-btn">Create Quiz</button>
             
             <h3>Get All Quizzes</h3>
             <div class="endpoint-info">GET /api/v1/quizzes</div>
-            <button onclick="getAllQuizzes()">Get All Quizzes</button>
+            <button onclick="getAllQuizzes()" id="get-quizzes-btn">Get All Quizzes</button>
             
             <div id="quiz-response" class="response" style="display: none;"></div>
             <div id="current-quiz" class="quiz-info" style="display: none;">
@@ -236,7 +236,7 @@
         <!-- Validation Testing Section -->
         <div class="section">
             <h2>5. Validation Testing</h2>
-            <button onclick="testInvalidQuiz()" class="danger">Test Invalid Quiz Creation</button>
+            <button onclick="testInvalidQuiz()" class="danger" id="test-invalid-quiz-btn">Test Invalid Quiz Creation</button>
             <button onclick="testInvalidQuestion()" class="danger" id="test-invalid-btn" disabled>Test Invalid Question Creation</button>
             
             <div id="validation-response" class="response" style="display: none;"></div>
@@ -652,11 +652,57 @@
         window.onload = function() {
             showToast('🚀 Initializing Quiz API Test Interface...', 'info', 2000);
             
+            // Add event listeners to replace inline onclick handlers
+            setupEventListeners();
+            
             // Auto health check after a short delay
             setTimeout(() => {
                 healthCheck();
             }, 1000);
         };
+
+        function setupEventListeners() {
+            // Remove onclick attributes and add event listeners
+            const buttons = {
+                'health-check-btn': healthCheck,
+                'create-quiz-btn': createQuiz,
+                'get-quizzes-btn': getAllQuizzes,
+                'add-single-btn': addSingleChoiceQuestion,
+                'add-multiple-btn': addMultipleChoiceQuestion,
+                'add-text-btn': addTextQuestion,
+                'get-questions-btn': getQuizQuestions,
+                'submit-correct-btn': submitCorrectAnswers,
+                'submit-partial-btn': submitPartialAnswers,
+                'submit-wrong-btn': submitWrongAnswers,
+                'test-invalid-quiz-btn': testInvalidQuiz,
+                'test-invalid-btn': testInvalidQuestion
+            };
+
+            Object.keys(buttons).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('click', buttons[id]);
+                }
+            });
+
+            // Also handle buttons without specific IDs by their onclick content
+            const allButtons = document.querySelectorAll('button[onclick]');
+            allButtons.forEach(button => {
+                const onclickValue = button.getAttribute('onclick');
+                button.removeAttribute('onclick');
+                
+                if (onclickValue) {
+                    button.addEventListener('click', function() {
+                        // Safely execute the original onclick function
+                        try {
+                            eval(onclickValue);
+                        } catch (error) {
+                            console.error('Error executing button function:', error);
+                        }
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>
