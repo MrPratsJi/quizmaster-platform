@@ -4,6 +4,18 @@ import { QuizManagementController } from '../controllers/QuizManagementControlle
 const router = Router();
 const quizManagementController = new QuizManagementController();
 
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'QuizMaster Management API is operational',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production',
+    version: '1.0.0',
+    uptime: process.uptime()
+  });
+});
+
 // Quiz establishment and management routes
 router.post('/', quizManagementController.establishQuiz);
 router.get('/', quizManagementController.retrieveQuizCollection);

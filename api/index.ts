@@ -26,8 +26,30 @@ app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
 
+// Add middleware to log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
 // Routes
 app.use('/api/v1', quizRoutes);
+
+// Catch-all handler for debugging
+app.use('*', (req, res) => {
+  console.log(`Unhandled route: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    error: 'Route not found',
+    method: req.method,
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /api/v1/health',
+      'GET /api/v1/quizzes',
+      'POST /api/v1/quizzes',
+      'GET /test'
+    ]
+  });
+});
 
 // Health check
 app.get('/api/v1/health', (req, res) => {
