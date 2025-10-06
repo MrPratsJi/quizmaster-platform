@@ -32,21 +32,23 @@ app.get('/api/v1/health', (req, res) => {
 
 // Serve test interface for root route
 app.get('/', (req, res) => {
-  const testInterfacePath = path.join(__dirname, '..', 'test-interface.html');
-  if (fs.existsSync(testInterfacePath)) {
-    res.sendFile(testInterfacePath);
-  } else {
-    res.json({
-      success: true,
-      message: 'QuizMaster Management Platform API',
-      version: '1.0.0',
-      documentation: {
-        health: '/api/v1/health',
-        quizzes: '/api/v1/quizzes',
-        testInterface: '/test'
-      }
-    });
-  }
+  res.json({
+    success: true,
+    message: 'QuizMaster Management Platform API',
+    version: '1.0.0',
+    documentation: {
+      health: '/api/v1/health',
+      quizzes: '/api/v1/quizzes',
+      testInterface: '/test'
+    },
+    endpoints: [
+      'GET /api/v1/health - Health check',
+      'GET /api/v1/quizzes - List all quizzes',
+      'POST /api/v1/quizzes - Create new quiz',
+      'POST /api/v1/quizzes/:id/questions - Add question',
+      'POST /api/v1/quizzes/:id/submit - Submit answers'
+    ]
+  });
 });
 
 // Serve test interface
@@ -55,7 +57,18 @@ app.get('/test', (req, res) => {
   if (fs.existsSync(testInterfacePath)) {
     res.sendFile(testInterfacePath);
   } else {
-    res.status(404).json({ error: 'Test interface not found' });
+    // If file doesn't exist, serve a basic test interface
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>QuizMaster Test Interface</title></head>
+      <body>
+        <h1>QuizMaster API Test Interface</h1>
+        <p>API is running at: <a href="/api/v1/health">/api/v1/health</a></p>
+        <p>Quizzes endpoint: <a href="/api/v1/quizzes">/api/v1/quizzes</a></p>
+      </body>
+      </html>
+    `);
   }
 });
 
