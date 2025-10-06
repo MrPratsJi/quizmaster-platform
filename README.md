@@ -509,15 +509,10 @@ src/
 - Webhook support for external system notifications
 - Export functionality (PDF, Excel, CSV formats)
 
----
 
-## 📄 License & Contributing
+## **Deployed Link**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for complete details.
-
-**Contributing Guidelines**: We welcome contributions! Please read our contribution guidelines and code of conduct before submitting pull requests.
-
-**Support**: For technical support or questions, please create an issue in the GitHub repository or contact our development team.
+- https://quizmaster-platform.vercel.app/test
 
 ---
 
