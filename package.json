@@ -20,6 +20,9 @@
     "express",
     "rest"
   ],
+  "engines": {
+    "node": "18.x"
+  },
   "author": "Quiz App Developer",
   "license": "MIT",
   "dependencies": {
