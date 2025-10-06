@@ -35,32 +35,6 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1', quizRoutes);
 
-// Catch-all handler for debugging
-app.use('*', (req, res) => {
-  console.log(`Unhandled route: ${req.method} ${req.originalUrl}`);
-  res.status(404).json({
-    error: 'Route not found',
-    method: req.method,
-    path: req.originalUrl,
-    availableRoutes: [
-      'GET /api/v1/health',
-      'GET /api/v1/quizzes',
-      'POST /api/v1/quizzes',
-      'GET /test'
-    ]
-  });
-});
-
-// Health check
-app.get('/api/v1/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'QuizMaster Management API is operational',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
 // Serve test interface for root route
 app.get('/', (req, res) => {
   res.json({
@@ -106,6 +80,23 @@ app.get('/test', (req, res) => {
       </html>
     `);
   }
+});
+
+// Catch-all handler for debugging (must be last)
+app.use('*', (req, res) => {
+  console.log(`Unhandled route: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    error: 'Route not found',
+    method: req.method,
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /',
+      'GET /api/v1/health',
+      'GET /api/v1/quizzes',
+      'POST /api/v1/quizzes',
+      'GET /test'
+    ]
+  });
 });
 
 // Export for Vercel
