@@ -9,6 +9,8 @@ import fs from 'fs';
 // Import your existing app components
 import quizRoutes from '../src/routes/quiz';
 
+console.log('Quiz routes imported:', typeof quizRoutes);
+
 const app = express();
 
 // Middleware
@@ -33,7 +35,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
+console.log('Registering quiz routes...');
 app.use('/api/v1', quizRoutes);
+console.log('Quiz routes registered successfully');
 
 // Serve test interface for root route
 app.get('/', (req, res) => {

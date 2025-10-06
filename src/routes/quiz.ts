@@ -17,9 +17,20 @@ router.get('/health', (req, res) => {
 });
 
 // Quiz establishment and management routes
-router.post('/', quizManagementController.establishQuiz);
-router.get('/', quizManagementController.retrieveQuizCollection);
-router.get('/:quizId', quizManagementController.locateQuizByIdentifier);
+router.post('/', (req, res, next) => {
+  console.log('POST / route hit');
+  next();
+}, quizManagementController.establishQuiz);
+
+router.get('/', (req, res, next) => {
+  console.log('GET / route hit in quiz routes');
+  next();
+}, quizManagementController.retrieveQuizCollection);
+
+router.get('/:quizId', (req, res, next) => {
+  console.log('GET /:quizId route hit');
+  next();
+}, quizManagementController.locateQuizByIdentifier);
 
 // Question attachment and retrieval routes
 router.post('/:quizId/questions', quizManagementController.attachQuestionToQuiz);
